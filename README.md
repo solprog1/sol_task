@@ -14,7 +14,7 @@ The normal cargo build is available for building the program:
 $ cargo build
 
 ```
-**Note**: The 2 main files that covers the implimatation of the task are 
+**Note**: The 2 main files that covers the implimentation of the task are 
 ```
 $ Token/cli/src/main.rs
 $ Token/program/src/processor.rs
