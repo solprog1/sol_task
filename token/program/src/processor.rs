@@ -29,8 +29,8 @@ impl Processor {
         freeze_authority: COption<Pubkey>,
         rent_sysvar_account: bool,
     ) -> ProgramResult {
-        let account_info_iter = &mut accounts.iter();
-        let mint_info = next_account_info(account_info_iter)?;
+        let account_info_iter = &mut accounts.iter(); //gets the account iterable
+        let mint_info = next_account_info(account_info_iter)?;  //calls info acctout provided by the lib to get info for the mind account 
         let mint_data_len = mint_info.data_len();
         let rent = if rent_sysvar_account {
             Rent::from_account_info(next_account_info(account_info_iter)?)?
@@ -38,19 +38,20 @@ impl Processor {
             Rent::get()?
         };
 
-        let mut mint = Mint::unpack_unchecked(&mint_info.data.borrow())?;
+        let mut mint = Mint::unpack_unchecked(&mint_info.data.borrow())?; //verifies if the mint account has already be initailiaze or assigned to some token
         if mint.is_initialized {
             return Err(TokenError::AlreadyInUse.into());
         }
 
-        if !rent.is_exempt(mint_info.lamports(), mint_data_len) {
+        if !rent.is_exempt(mint_info.lamports(), mint_data_len) {   //verfies if the mint accout has required rent
             return Err(TokenError::NotRentExempt.into());
         }
 
+        //all data below is taken and saved into the mint account
         mint.mint_authority = COption::Some(mint_authority);
-        mint.decimals = decimals;
+        mint.decimals = decimals; //to set the decicimal place for the created token
         mint.is_initialized = true;
-        mint.freeze_authority = freeze_authority;
+        mint.freeze_authority = freeze_authority; //this sets authorization for who can freeze the account 
 
         Mint::pack(mint, &mut mint_info.data.borrow_mut())?;
 
@@ -97,6 +98,7 @@ impl Processor {
             Rent::get()?
         };
 
+
         let mut account = Account::unpack_unchecked(&new_account_info.data.borrow())?;
         if account.is_initialized() {
             return Err(TokenError::AlreadyInUse.into());
@@ -111,7 +113,7 @@ impl Processor {
                 .map_err(|_| Into::<ProgramError>::into(TokenError::InvalidMint))?;
         }
 
-        account.mint = *mint_info.key;
+        account.mint = *mint_info.key; //account is also the data above, sets the mints an pubkey
         account.owner = *owner;
         account.delegate = COption::None;
         account.delegated_amount = 0;
@@ -128,7 +130,7 @@ impl Processor {
             account.amount = 0;
         };
 
-        Account::pack(account, &mut new_account_info.data.borrow_mut())?;
+        Account::pack(account, &mut new_account_info.data.borrow_mut())?;  //All deta collected above is saved to the account 
 
         Ok(())
     }
@@ -258,7 +260,7 @@ impl Processor {
                     return Err(TokenError::InsufficientFunds.into());
                 }
                 if !self_transfer {
-                    source_account.delegated_amount = source_account
+                    source_account.delegated_amount = source_account   //check the amoont , and subtract it to the new account
                         .delegated_amount
                         .checked_sub(amount)
                         .ok_or(TokenError::Overflow)?;

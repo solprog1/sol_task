@@ -281,7 +281,7 @@ fn command_create_token(
 ) -> CommandResult {
     println_display(config, format!("Creating token {}", token));
 
-    let minimum_balance_for_rent_exemption = if !config.sign_only {   //calculates the mininum balance for rent exemption for account for the program 
+    let minimum_balance_for_rent_exemption = if !config.sign_only {   //calculates account with  the mininum balance for rent exemption for account for the program 
         config
             .rpc_client
             .get_minimum_balance_for_rent_exemption(Mint::LEN)?
@@ -323,7 +323,7 @@ fn command_create_account(
     config: &Config,
     token: Pubkey,
     owner: Pubkey,
-    maybe_account: Option<Pubkey>,
+    maybe_account: Option<Pubkey>, //incase you give an explicit account 
 ) -> CommandResult {
     let minimum_balance_for_rent_exemption = if !config.sign_only {
         config
@@ -339,14 +339,14 @@ fn command_create_account(
             account,
             false,
             vec![
-                system_instruction::create_account(
+                system_instruction::create_account(      //creates an account using system program
                     &config.fee_payer,
                     &account,
                     minimum_balance_for_rent_exemption,
                     Account::LEN as u64,
                     &spl_token::id(),
                 ),
-                initialize_account(&spl_token::id(), &account, &token, &owner)?,
+                initialize_account(&spl_token::id(), &account, &token, &owner)?, //calls the porocess inialize account to be passed to the solana blockchain
             ],
         )
     } else {
@@ -571,7 +571,7 @@ fn command_transfer(
     use_unchecked_instruction: bool,
     memo: Option<String>,
 ) -> CommandResult {
-    let sender = if let Some(sender) = sender {
+    let sender = if let Some(sender) = sender {        //checks that there is ATA for the sender
         sender
     } else {
         get_associated_token_address(&sender_owner, &token)
@@ -693,13 +693,13 @@ fn command_transfer(
                         ),
                     );
                 }
-                instructions.push(create_associated_token_account(
+                instructions.push(create_associated_token_account(  
                     &config.fee_payer,
                     &recipient,
                     &mint_pubkey,
                 ));
             } else {
-                return Err(
+                return Err(      //need funding flag - this is there is no ATA- this can be that we get charged to create the account
                     "Error: Recipient's associated token account does not exist. \
                                     Add `--fund-recipient` to fund their account"
                         .into(),
