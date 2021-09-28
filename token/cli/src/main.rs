@@ -270,6 +270,7 @@ pub fn signers_of(
     }
 }
 
+// Here is a function that allows me create a token , 
 fn command_create_token(
     config: &Config,
     decimals: u8,
@@ -280,7 +281,7 @@ fn command_create_token(
 ) -> CommandResult {
     println_display(config, format!("Creating token {}", token));
 
-    let minimum_balance_for_rent_exemption = if !config.sign_only {
+    let minimum_balance_for_rent_exemption = if !config.sign_only {   //calculates the mininum balance for rent exemption for account for the program 
         config
             .rpc_client
             .get_minimum_balance_for_rent_exemption(Mint::LEN)?
@@ -289,14 +290,18 @@ fn command_create_token(
     };
     let freeze_authority_pubkey = if enable_freeze { Some(authority) } else { None };
 
-    let mut instructions = vec![
-        system_instruction::create_account(
+
+    //note :  The system instruction goes to the solana blockchain system program  not the token program 
+    let mut instructions = vec![                    
+        system_instruction::create_account(            //creates the account - As mint account needs to be created first , and funded with require amount of sol tokens 
             &config.fee_payer,
             &token,
-            minimum_balance_for_rent_exemption,
+            minimum_balance_for_rent_exemption,       // specifies the mininum of sol token 
             Mint::LEN as u64,
-            &spl_token::id(),
+            &spl_token::id(),                       // creates sol token ID asigned 
         ),
+
+        // The initialize mint is sent system program 
         initialize_mint(
             &spl_token::id(),
             &token,

@@ -7,9 +7,11 @@ use solana_program::{
 };
 
 entrypoint!(process_instruction);
+
+// This function is later sent to the processor (check processor.rs)
 fn process_instruction(
-    program_id: &Pubkey,
-    accounts: &[AccountInfo],
+    program_id: &Pubkey,   
+    accounts: &[AccountInfo],  //list of accounts 
     instruction_data: &[u8],
 ) -> ProgramResult {
     if let Err(error) = Processor::process(program_id, accounts, instruction_data) {

@@ -21,7 +21,8 @@ use solana_program::{
 /// Program state handler.
 pub struct Processor {}
 impl Processor {
-    fn _process_initialize_mint(
+
+    fn _process_initialize_mint(    //this function is called the the mint command is called 
         accounts: &[AccountInfo],
         decimals: u8,
         mint_authority: Pubkey,
